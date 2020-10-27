@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Poubelle'Co | La poubelle connecté</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&family=Roboto:wght@300;400;500&display=swap");
+            :root {
+                --primary: #a0e173;
+                --secondary: #68b4f2;
+            }
+
+            * {
+                padding: 0;
+                margin: 0;
+                box-sizing: border-box;
+            }
+
+            body,
+            html {
+                overflow-x: hidden;
+            }
+
+            body {
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+
+            .content {
+                background: #fdfdfd;
+                padding: 30px;
+                width: 90vw;
+                border-radius: 15px;
+                height: 90vh;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .title {
+                color: var(--primary);
+                font-family: "Montserrat", sans-serif;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .separator {
+                max-width: 50%;
+                margin: 0 auto 45px auto;
+                border: none;
+                background: var(--secondary);
+                height: 1px;
+            }
+
+            .camera {
+                margin: 0 auto;
+            }
+
+            .btn {
+                width: 260px;
+                height: 48px;
+                border: 1px solid var(--primary);
+                background: var(--primary);
+                border-radius: 50px;
+                color: white;
+                font-size: 16px;
+                font-weight: 500;
+                font-family: "Montserrat";
+                cursor: pointer;
+                margin: 0 auto;
+                display: block;
+                margin-top: 40px;
+                letter-spacing: 1px;
+                transition: all 0.5s;
+            }
+
+            .btn:hover {
+                background: white;
+                color: var(--primary);
+            }
+
+            .image-box img{
+                width: 320px;
+                height: 240px;
+            }
+
+            .photo-taked {
+                display: none;
+            }
+
+            .photo-taked__text {
+                font-size: 16px;
+                font-weight: 500;
+                font-family: "Roboto";
+                text-align: center;
+                margin-bottom: 15px;
+                color: #333;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="content">
+
+            <div class="camera-content">
+                <h1 class="title">Poubelle'Co</h1>
+
+                <hr class="separator" />
+
+                <div class="camera image-box" id="my_camera"></div>
+                <div class="photo-taked image-box" id="photo-taked"></div>
+
+                <div class="btn-box">
+                    <button type="button" class="btn" onClick="take_snapshot()">
+                        Scanner mon objet
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- First, include the Webcam.js JavaScript Library -->
+        <script
+            type="text/javascript"
+            src="http://localhost:3003/static/webcam.js"
+        ></script>
+
+        <!-- Configure a few settings and attach camera -->
+        <script language="JavaScript">
+            Webcam.set({
+                width: 320,
+                height: 240,
+                image_format: "jpeg",
+                jpeg_quality: 90
+            });
+            Webcam.attach("#my_camera");
+        </script>
+
+        <br />
+        <div id="labels"></div>
+
+        <!-- Code to handle taking the snapshot and displaying it locally -->
+        <script language="JavaScript">
+            function take_snapshot() {
+                // take snapshot and get image data
+                Webcam.snap(function(data_uri) {
+                    let camera = document.querySelector("#my_camera");
+                    let result = document.querySelector("#photo-taked");
+
+                    camera.style.display = "none";
+                    result.style.display = "block";
+
+                    result.innerHTML = `<p class="photo-taked__text">Votre image :</p><img src="${data_uri}"/>`;
+
+                    sendPicture(data_uri);
+                });
+            }
+            async function sendPicture(_image) {
+                console.log(_image);
+                try {
+                    const myHeaders = new Headers({
+                        "Content-Type": "application/json"
+                    });
+
+                    const myInit = {
+                        method: "POST",
+                        headers: myHeaders,
+                        mode: "cors",
+                        cache: "default",
+                        body: JSON.stringify({
+                            test: "test",
+                            image: _image
+                        })
+                    };
+                    let response = await fetch(
+                        "http://localhost:3003/",
+                        myInit
+                    );
+                    console.log(response);
+                    // if (response.status == 400)
+                    // throw new Error(response.statusText)
+
+                    let data = await response.json();
+                    console.log(data);
+                    if (!data) return alert("no data");
+                    console.log(data);
+                    clearNode("labels");
+                    data.map(label => {
+                        var node = document.createElement("div"); // Create a <li> node
+                        node.setAttribute("style", "text-align:center");
+                        var textnode = document.createTextNode(label); // Create a text node
+                        node.appendChild(textnode);
+                        return document
+                            .getElementById("labels")
+                            .appendChild(node);
+                    });
+                } catch (error) {
+                    alert(error);
+                }
+
+                function clearNode(seletor) {
+                    const node = document.getElementById(seletor);
+                    node.querySelectorAll("*").forEach(n => n.remove());
+                }
+            }
+        </script>
+    </body>
+</html>

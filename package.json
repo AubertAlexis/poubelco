@@ -1,0 +1,23 @@
+{
+    "name": "test-ml",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "export GOOGLE_APPLICATION_CREDENTIALS=\"/Users/thomas/Documents/testml/src/MachinLearning-39104a7659e1.json\" && nodemon ./src/index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@gitlab.mcc.ninja:thomasM/testml.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@google-cloud/vision": "^2.1.2",
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "fs": "0.0.1-security",
+        "path": "^0.12.7"
+    }
+}
